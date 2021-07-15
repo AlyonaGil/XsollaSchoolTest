@@ -34,9 +34,6 @@ class ProductController {
     async getOneById(req, res, next) {
         try {
             const {id} = req.params;
-            if (!id) {
-                return next(ApiError.badRequest('Не задан id'));
-            }
             const product = await Product.findOne({where: {id}});
             return res.json(product);
         } catch (e) {
@@ -47,26 +44,50 @@ class ProductController {
     async getOneBySku(req, res, next) {
         try {
             const {sku} = req.params;
-            if (!sku) {
-                return next(ApiError.badRequest('Не задан sku'));
-            }
             const product = await Product.findOne({ where: { sku: sku } });
             return res.json(product);
         } catch (e) {
             next(ApiError.internal(e.message));
         }
     }
-    async updateById(req, res) {
+    async updateById(req, res, next) {
+        try{
+            const {id, name, price, typeId} = req.body;
+            if (!id) {
+                return next(ApiError.badRequest('Не задан id'));
+            }
+            //{where: { id: id }}
+            const updateProduct = await Product.upsert({ name: name, price: price, typeId: typeId }, { returning: true });
+            return res.json(updateProduct);
+        } catch (e) {
+            next(ApiError.internal(e.message));
+        }
 
     }
-    async updateBySku(req, res) {
+    async updateBySku(req, res, next) {
+        const {sku, name, price, typeId} = req.body;
+        if (!sku) {
+            return next(ApiError.badRequest('Не задан sku'));
+        }
 
     }
-    async deleteById(req, res) {
-
+    async deleteById(req, res, next) {
+        try {
+            const {id} = req.params;
+            const product = await Product.destroy({where: {id}});
+            return res.json(product);
+        } catch (e) {
+            next(ApiError.internal(e.message));
+        }
     }
-    async deleteBySku(req, res) {
-
+    async deleteBySku(req, res, next) {
+        try {
+            const {sku} = req.params;
+            const product = await Product.destroy({where: { sku: sku }});
+            return res.json(product);
+        } catch (e) {
+            next(ApiError.internal(e.message));
+        }
     }
 }
 
