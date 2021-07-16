@@ -32,8 +32,6 @@ class ProductController {
 
     async getOneById(req, res, next) {
         const {id} = req.params;
-        // const product = await Product.findOne({where: {id}});
-        // return res.json(product);
         Product.findOne({where: {id}}).then(answer => {
             if (answer == null) {
                 res.send({message: `Product with id=${id} was not found`});
@@ -47,8 +45,6 @@ class ProductController {
 
     async getOneBySku(req, res, next) {
         const {sku} = req.params;
-        // const product = await Product.findOne({ where: {sku: sku}});
-        // return res.json(product);
         Product.findOne({ where: {sku: sku}}).then(answer => {
             if (answer == null) {
                 res.send({message: `Product with sku=${sku} was not found`});
@@ -63,8 +59,6 @@ class ProductController {
         if (!id) {
             return next(ApiError.badRequest('id is empty'));
         }
-        // const updateProduct = await Product.update(req.body, {where: { id: id }})
-        // return res.json(updateProduct);
         Product.update({name, typeId, price}, {where: { id: id }}).then(num => {
             if (num == 1) {
                 res.send({message: "Product was updated successfully."});
@@ -79,11 +73,6 @@ class ProductController {
         if (!sku) {
             return next(ApiError.badRequest('sku is empty'));
         }
-        if (id) {
-            return res.json({message: "parameter id passing is not allowed"});
-        }
-        // const updateProduct = await Product.update(req.body, {where: { sku: sku }})
-        // return res.json(updateProduct);
         Product.update({name, typeId, price}, {where: { sku: sku }}).then(num => {
             if (num == 1) {
                 res.send({message: "Product was updated successfully."});
@@ -95,7 +84,7 @@ class ProductController {
 
     async deleteById(req, res, next) {
         const {id} = req.params;
-        const product = await Product.destroy({where: {id}}).then(num => {
+        Product.destroy({where: {id}}).then(num => {
             if (num == 1){
                 res.send({message: "Product was delete successfully."});
             } else {
@@ -105,7 +94,7 @@ class ProductController {
     }
     async deleteBySku(req, res, next) {
         const {sku} = req.params;
-        const product = await Product.destroy({where: { sku: sku }}).then(num => {
+        Product.destroy({where: { sku: sku }}).then(num => {
             if (num == 1){
                 res.send({message: "Product was delete successfully."});
             } else {
