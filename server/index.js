@@ -5,6 +5,7 @@ const models = require('./models/models');
 const cors = require('cors');
 const router= require('./routes/index');
 const errorHandler = require('./middleware/ErrorHandlerMiddleware');
+const errorRouterHandler = require('./middleware/ErrorRouterHandlerMiddleware');
 
 const PORT = process.env.PORT || 5000
 
@@ -14,12 +15,8 @@ app.use(express.json()) //чтобы приложение могло парси�
 app.use('/api', router)
 
 
-//Обработка ошибок, последний middleware
 app.use(errorHandler)
-app.use(function(req, res, next){
-    res.status(404);
-    res.send({ error: 'Page was not found' });
-});
+app.use(errorRouterHandler);
 
 const start = async () => {
     try {
