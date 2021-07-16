@@ -18,7 +18,7 @@ app.use('/api', router)
 app.use(errorHandler)
 app.use(function(req, res, next){
     res.status(404);
-    res.send({ error: 'Not found' });
+    res.send({ error: 'Page was not found' });
 });
 
 const start = async () => {

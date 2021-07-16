@@ -15,15 +15,14 @@ class ProductController {
     async getAll(req, res, next) {
         try {
             let {typeId, limit, page} = req.query;
-            page = page || 1; //текущая страница
-            limit = limit || 10; //кол-во записей для одной страницы
+            page = page || 1;
+            limit = limit || 10;
             let offset = page * limit - limit;
             let product;
             if (!typeId){
-                product = await Product.findAll({limit, offset});
-            }
-            if (typeId){ //Фильтрация по TypeId
-                product = await Product.findAll({where:{typeId}, limit, offset});
+                product = await Product.findAndCountAll({limit, offset});
+            } else { //Фильтрация по TypeId
+                product = await Product.findAndCountAll({where:{typeId}, limit, offset});
             }
             return res.json(product);
         } catch (e) {
@@ -32,62 +31,87 @@ class ProductController {
     }
 
     async getOneById(req, res, next) {
-        try {
-            const {id} = req.params;
-            const product = await Product.findOne({where: {id}});
-            return res.json(product);
-        } catch (e) {
-            next(ApiError.internal(e.message));
-        }
+        const {id} = req.params;
+        // const product = await Product.findOne({where: {id}});
+        // return res.json(product);
+        Product.findOne({where: {id}}).then(answer => {
+            if (answer == null) {
+                res.send({message: `Product with id=${id} was not found`});
+            }
+            else
+            {
+                res.send(answer);
+            }
+        }).catch (e => next(ApiError.internal(e.message)));
     }
 
     async getOneBySku(req, res, next) {
-        try {
-            const {sku} = req.params;
-            const product = await Product.findOne({ where: { sku: sku } });
-            return res.json(product);
-        } catch (e) {
-            next(ApiError.internal(e.message));
-        }
+        const {sku} = req.params;
+        // const product = await Product.findOne({ where: {sku: sku}});
+        // return res.json(product);
+        Product.findOne({ where: {sku: sku}}).then(answer => {
+            if (answer == null) {
+                res.send({message: `Product with sku=${sku} was not found`});
+            }
+            else {
+                res.send(answer);
+            }
+        }).catch (e => next(ApiError.internal(e.message)));
     }
     async updateById(req, res, next) {
-        try{
-            const {id, name, price, typeId} = req.body;
-            if (!id) {
-                return next(ApiError.badRequest('Не задан id'));
+        const {id, name, typeId, price} = req.body;
+        if (!id) {
+            return next(ApiError.badRequest('id is empty'));
+        }
+        // const updateProduct = await Product.update(req.body, {where: { id: id }})
+        // return res.json(updateProduct);
+        Product.update({name, typeId, price}, {where: { id: id }}).then(num => {
+            if (num == 1) {
+                res.send({message: "Product was updated successfully."});
+            } else {
+                res.send({message: `Cannot update product with id=${id}. Maybe product was not found`});
             }
-            //{where: { id: id }}
-            const updateProduct = await Product.upsert({ name: name, price: price, typeId: typeId }, { returning: true });
-            return res.json(updateProduct);
-        } catch (e) {
-            next(ApiError.internal(e.message));
-        }
-
+        }). catch(e => next(ApiError.internal(e.message)));
     }
+
     async updateBySku(req, res, next) {
-        const {sku, name, price, typeId} = req.body;
+        const {sku, name, typeId, price} = req.body;
         if (!sku) {
-            return next(ApiError.badRequest('Не задан sku'));
+            return next(ApiError.badRequest('sku is empty'));
         }
-
+        if (id) {
+            return res.json({message: "parameter id passing is not allowed"});
+        }
+        // const updateProduct = await Product.update(req.body, {where: { sku: sku }})
+        // return res.json(updateProduct);
+        Product.update({name, typeId, price}, {where: { sku: sku }}).then(num => {
+            if (num == 1) {
+                res.send({message: "Product was updated successfully."});
+            } else {
+                res.send({message: `Cannot update product with sku=${sku}. Maybe product was not found`});
+            }
+        }). catch(e => next(ApiError.internal(e.message)));
     }
+
     async deleteById(req, res, next) {
-        try {
-            const {id} = req.params;
-            const product = await Product.destroy({where: {id}});
-            return res.json(product);
-        } catch (e) {
-            next(ApiError.internal(e.message));
-        }
+        const {id} = req.params;
+        const product = await Product.destroy({where: {id}}).then(num => {
+            if (num == 1){
+                res.send({message: "Product was delete successfully."});
+            } else {
+                res.send({message: `Cannot delete product with id=${id}. Maybe product was not found`});
+            }
+        }).catch (e => next(ApiError.internal(e.message)));
     }
     async deleteBySku(req, res, next) {
-        try {
-            const {sku} = req.params;
-            const product = await Product.destroy({where: { sku: sku }});
-            return res.json(product);
-        } catch (e) {
-            next(ApiError.internal(e.message));
-        }
+        const {sku} = req.params;
+        const product = await Product.destroy({where: { sku: sku }}).then(num => {
+            if (num == 1){
+                res.send({message: "Product was delete successfully."});
+            } else {
+                res.send({message: `Cannot delete product with sku=${sku}. Maybe product was not found`});
+            }
+        }).catch (e => next(ApiError.internal(e.message)));
     }
 }
 
