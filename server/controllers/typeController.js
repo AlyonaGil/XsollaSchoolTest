@@ -22,13 +22,16 @@ class TypeController {
     }
 
     async getOne(req, res, next) {
-        try {
-            const {id} = req.params;
-            const type = await Type.findOne({where: {id}});
-            return res.json(type);
-        } catch (e) {
-            next(ApiError.internal(e.message));
-        }
+        const {id} = req.params;
+        Type.findOne({where: {id}}).then(answer => {
+            if (answer == null) {
+                res.send({message: `Type with id=${id} was not found`});
+            }
+            else
+            {
+                res.send(answer);
+            }
+        }).catch (e => next(ApiError.internal(e.message)));
     }
 }
 
